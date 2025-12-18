@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoWallet | Carbon Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #059669;
+            --accent: #f59e0b;
+            --glass: rgba(255,255,255,0.75);
+            --dark-glass: rgba(255,255,255,0.05);
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .header {
+            text-align: center; padding: 48px 0; background: white;
+            border-radius: 16px; margin-bottom: 32px; box-shadow: var(--shadow);
+        }
+        .logo { font-size: 2rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; }
+        .tagline { color: #6b7280; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        .metric { 
+            font-size: 3.5rem; font-weight: 700; color: var(--primary);
+            margin: 24px 0; line-height: 1;
+        }
+        .nav {
+            display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+            background: white; padding: 20px; border-radius: 12px; margin: 32px 0;
+            box-shadow: var(--shadow);
+        }
+        .nav-btn {
+            padding: 12px 24px; background: #f9fafb; border: 1px solid #e5e7eb;
+            border-radius: 8px; color: #374151; cursor: pointer; font-weight: 500;
+            transition: all 0.2s; font-size: 0.95rem;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--primary); color: white; border-color: var(--primary);
+        }
+        .screen { display: none; padding: 48px 0; }
+        .screen.active { display: block; }
+        .card {
+            background: white; padding: 32px; border-radius: 16px; box-shadow: var(--shadow);
+            margin: 24px 0;
+        }
+        .card h2 { color: #111827; margin-bottom: 24px; font-size: 1.5rem; font-weight: 600; }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block; margin-bottom: 8px; font-weight: 500; color: #374151;
+        }
+        input, select {
+            width: 100%; padding: 12px 16px; border: 1px solid #d1d5db;
+            border-radius: 8px; font-size: 1rem; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,0.1); }
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 14px 28px;
+            border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .btn:hover { background: #1e3a8a; transform: translateY(-1px); }
+        .btn-secondary { background: #f3f4f6; color: #374151; }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .result {
+            background: #f0fdf4; border-left: 4px solid var(--secondary);
+            padding: 24px; border-radius: 8px; margin-top: 20px;
+        }
+        .leaderboard {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .leader-row {
+            display: flex; justify-content: space-between; padding: 16px;
+            background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;
+        }
+        .scanner-area {
+            border: 2px dashed #d1d5db; border-radius: 12px; padding: 48px;
+            text-align: center; background: #fafbfc;
+        }
+        canvas { max-width: 100%; height: 300px; border-radius: 8px; margin-top: 16px; }
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px; margin: 32px 0;
+        }
+        .metric-item {
+            background: white; padding: 24px; border-radius: 12px; text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .metric-value { font-size: 2rem; font-weight: 600; color: var(--primary); }
+        .footer {
+            text-align: center; padding: 48px 0; color: #6b7280;
+            background: white; border-radius: 16px; margin-top: 48px; box-shadow: var(--shadow);
+        }
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .metric { font-size: 2.5rem; }
+            .nav { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">EcoWallet</div>
+            <div class="tagline">Track your carbon footprint and discover sustainable savings</div>
+            <div class="metric" id="carbonScore">75</div>
+            <div style="color: #6b7280; font-size: 1.1rem;">Carbon Score (out of 100)</div>
+        </header>
+
+        <nav class="nav" id="nav">
+            <button class="nav-btn active" onclick="showScreen('dashboard')">Dashboard</button>
+            <button class="nav-btn" onclick="showScreen('scanner')">Receipt Scanner</button>
+            <button class="nav-btn" onclick="showScreen('calculator')">Savings Calculator</button>
+            <button class="nav-btn" onclick="showScreen('leaderboard')">Leaderboard</button>
+        </nav>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="screen active">
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-value" id="weeklySavings">$24</div>
+                    <div>Weekly Savings</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value" id="totalCO2">14.7kg</div>
+                    <div>CO2 Saved</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value" id="streak">7</div>
+                    <div>Day Streak</div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Your Progress</h2>
+                <p style="color: #6b7280; line-height: 1.7;">
+                    Track daily spending and discover greener alternatives. 
+                    Every scan helps reduce your carbon footprint and save money.
+                </p>
+                <button class="btn btn-secondary" onclick="resetDemoData()">Reset Demo Data</button>
+            </div>
+        </section>
+
+        <!-- Scanner -->
+        <section id="scanner" class="screen">
+            <div class="card">
+                <h2>Receipt Scanner</h2>
+                <p style="color: #6b7280; margin-bottom: 24px;">
+                    Upload a receipt to analyze its environmental impact
+                </p>
+                <div class="scanner-area">
+                    <input type="file" id="receiptUpload" accept="image/*" style="display: none;">
+                    <label for="receiptUpload" class="btn" style="display: inline-block;">
+                        Choose Receipt Image
+                    </label>
+                    <div style="margin-top: 16px; color: #6b7280;">
+                        Supports JPG, PNG (demo analysis)
+                    </div>
+                </div>
+                <canvas id="scannerCanvas" style="display: none;"></canvas>
+                <div id="scannerResult" class="result" style="display: none;">
+                    <h3>Analysis Complete</h3>
+                    <div style="font-size: 1.1rem; margin: 12px 0;">
+                        <strong>Coffee purchase:</strong> 2.1kg CO₂<br>
+                        <strong>Greener alternative:</strong> Tea (1.8kg CO₂ saved)
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <button class="btn btn-secondary">Find Tea Options</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculator -->
+        <section id="calculator" class="screen">
+            <div class="card">
+                <h2>Savings Calculator</h2>
+                <div class="input-group">
+                    <label>Amount Spent</label>
+                    <input type="number" id="spendAmount" placeholder="50" value="50">
+                </div>
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="category">
+                        <option value="groceries">Groceries</option>
+                        <option value="transport">Transport</option>
+                        <option value="coffee">Coffee & Dining</option>
+                        <option value="shopping">Shopping</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="calculateSavings()">Calculate Savings</button>
+                <div id="calcResult" class="result" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- Leaderboard -->
+        <section id="leaderboard" class="screen">
+            <div class="card">
+                <h2>Weekly Leaderboard</h2>
+                <div class="leaderboard">
+                    <div class="leader-row">
+                        <span>Sarah Green</span>
+                        <span>$124 saved</span>
+                    </div>
+                    <div class="leader-row">
+                        <span>John Eco</span>
+                        <span>$98 saved</span>
+                    </div>
+                    <div class="leader-row" style="background: #dbeafe;">
+                        <span>You</span>
+                        <span id="userRank">$<span id="userScore">45</span></span>
+                    </div>
+                </div>
+                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                    <button class="btn btn-secondary">Share Your Progress</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div>© 2025 EcoWallet. Built for sustainability.</div>
+            <div style="margin-top: 8px; font-size: 0.9rem;">
+                Demo prototype • Data stored locally • No accounts required
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let userData = JSON.parse(localStorage.getItem('ecowallet-demo')) || {
+            carbonScore: 75, weeklySavings: 24, totalCO2: 14.7, streak: 7, userScore: 45
+        };
+
+        function updateDashboard() {
+            document.getElementById('carbonScore').textContent = userData.carbonScore;
+            document.getElementById('weeklySavings').textContent = `$${userData.weeklySavings}`;
+            document.getElementById('totalCO2').textContent = `${userData.totalCO2}kg`;
+            document.getElementById('streak').textContent = userData.streak;
+            document.getElementById('userScore').textContent = userData.userScore.toFixed(0);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            event.target.classList.add('active');
+            if (screenId === 'dashboard') updateDashboard();
+        }
+
+        // Scanner demo
+        document.getElementById('receiptUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const canvas = document.getElementById('scannerCanvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                canvas.style.display = 'block';
+                ctx.drawImage(img, 0, 0);
+                
+                // Overlay analysis
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.fillRect(20, 20, 280, 100);
+                ctx.fillStyle = '#059669';
+                ctx.font = 'bold 20px Inter';
+                ctx.fillText('Analysis: 2.1kg CO₂', 40, 55);
+                ctx.font = '16px Inter';
+                ctx.fillStyle = '#1f2937';
+                ctx.fillText('Tea alternative: 1.8kg saved', 40, 80);
+                
+                document.getElementById('scannerResult').style.display = 'block';
+            };
+            img.src = URL.createObjectURL(file);
+        });
+
+        function calculateSavings() {
+            const amount = parseFloat(document.getElementById('spendAmount').value);
+            const category = document.getElementById('category').value;
+            
+            const factors = {
+                groceries: { co2: 0.3, savings: 0.16 },
+                transport: { co2: 0.5, savings: 0.12 },
+                coffee: { co2: 0.42, savings: 0.024 },
+                shopping: { co2: 0.25, savings: 0.10 }
+            };
+            
+            const data = factors[category];
+            const co2 = (amount * data.co2).toFixed(1);
+            const savings = (amount * data.savings).toFixed(1);
+            
+            document.getElementById('calcResult').innerHTML = `
+                <h3>Results</h3>
+                <div style="font-size: 1.1rem; margin: 12px 0;">
+                    <strong>$${amount} ${category}</strong><br>
+                    ${co2}kg CO₂ footprint<br>
+                    <span style="color: var(--secondary); font-weight: 600;">
+                        Potential savings: $${savings}
+                    </span>
+                </div>
+            `;
+            document.getElementById('calcResult').style.display = 'block';
+            
+            userData.weeklySavings += parseFloat(savings);
+            userData.totalCO2 += parseFloat(co2);
+            localStorage.setItem('ecowallet-demo', JSON.stringify(userData));
+            updateDashboard();
+        }
+
+        function resetDemoData() {
+            if (confirm('Reset all demo data?')) {
+                localStorage.removeItem('ecowallet-demo');
+                location.reload();
+            }
+        }
+
+        updateDashboard();
+    </script>
+</body>
+</html>
